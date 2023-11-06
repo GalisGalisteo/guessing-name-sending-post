@@ -11,6 +11,7 @@ let previousGuesses = [];
 let numGuesses = 1;
 let playGame = true;
 let remainingSeconds = 3600;
+const playerName = "Galis";
 
 document.querySelector("#remaining-time").innerHTML = remainingSeconds;
 
@@ -73,11 +74,26 @@ function validateGuess(guess) {
 async function sendScoreToServer() {
   // TODO: Establecer adecuadamente el valor de las propiedades elapsed_time y attempts
   const score = {
-    machine: "",
-    elapsed_time: 0,
-    attempts: 0,
+    machine: playerName,
+    elapsed_time: 3600 - remainingSeconds,
+    attempts: numGuesses - 1,
   };
   // TODO: CODE ME!! Haz el POST con la función fetch.
+
+  const response = await fetch(
+    "https://guessing-name-score-api.onrender.com/add-score",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      body: JSON.stringify(score),
+    }
+  );
+
+  const result = await response.json();
+  console.log(result);
+
   console.log("Enviando los datos al servidor de King.com"); //POST
   // Enviamos los datos al endpoint
 }
@@ -91,6 +107,7 @@ function checkGuess(guess) {
 
     sendScoreToServer();
     endGame();
+    scoreAllPlayers();
   } else if (guess < randomNumber) {
     displayMessage(`Too low! Try again!`);
   } else if (guess > randomNumber) {
@@ -140,6 +157,45 @@ function newGame() {
     // volver a lanzar el setInterval
     remainingSeconds = 60;
     timer = setInterval(updateRemainingTime, 1000);
+  });
+}
+
+const getScoreUrl = "https://guessing-name-score-api.onrender.com/get-scores";
+const fetchData = async (url) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Error fetching the pokemon");
+  }
+  const data = await response.json();
+  return data;
+};
+
+async function scoreAllPlayers() {
+  const scoresTable = document.createElement("table");
+  scoresTable.classList.add("table");
+  scoresTable.innerHTML = `
+  <thead>
+    <tr>
+      <th>Nombre de la Máquina</th>
+      <th>Intentos</th>
+      <th>Tiempo Transcurrido</th>
+    </tr>
+  </thead>
+  `;
+  document.querySelector("#score-table").appendChild(scoresTable);
+  const score = document.createElement("tbody");
+  scoresTable.appendChild(score);
+
+  const scores = await fetchData(getScoreUrl);
+  // console.log("🚀 ~ file: app.js:184 ~ scoreAllPlayers ~ scores:", scores);
+  scores.forEach((s) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${s.machine}</td>
+        <td>${s.attempts}</td>
+        <td>${s.elapsed_time}</td>
+      `;
+    score.appendChild(row);
   });
 }
 //Allow to restart game with restart button

@@ -7,6 +7,8 @@ body {
     max-width: 750px;
     min-width: 480px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .lastResult {
@@ -87,4 +89,23 @@ h1 {
 p {
     font-size: 20px;
     text-align: center;
+}
+
+.table td,
+.table th {
+text-align: center;
+padding: 1rem;
+}
+
+.table tbody tr:nth-child(odd) {
+background-color: #f2f2f2;
+}
+
+.table thead {
+background-color: #8a2be2;
+color: #fff;
+}
+
+.table thead th {
+font-weight: bold;
 }
